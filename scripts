@@ -1,0 +1,11 @@
+# Generate docs
+cargo doc --open
+
+# Run tests
+cargo test
+
+# Build
+cargo build
+
+# Build release
+cargo build --release
