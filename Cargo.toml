@@ -3,6 +3,31 @@ name = "rsclashapi"
 version = "0.1.0"
 edition = "2021"
 description = "A wrapper around the Clash of Clans API written in rust"
+readme = "README.md"
+homepage = "https://github.com/ickoxii/rsclashapi#README"
+repository = "https://github.com/ickoxii/rsclashapi"
 license = "MIT"
 
 [dependencies]
+# Networking
+actix-web = "~4.9.0"
+reqwest = { version = "~0.11.20", features = [
+	  "json",
+	  "cookie_store",
+	  "cookies", ] }
+tokio = { version = "~1", features = ["full"] }
+
+# Json serialize/deserialize
+serde = { version = "~1.0.188", features = ["derive"] }
+serde_json = "~1.0.105"
+serde_urlencoded = "~0.7.1"
+serde_repr = "~0.1.16"
+anyhow = "~1.0.95"
+thiserror = "~2.0.10"
+lazy_static = "~1.5.0"
+url = "~2.5.4"
+
+[dev-dependencies]
+dotenv = "~0.15.0"
+dotenv_codegen = "~0.15.0" # For dotenv macro
+wiremock = "~0.6.2"
