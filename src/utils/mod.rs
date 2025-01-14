@@ -22,11 +22,13 @@ pub async fn get_ip() -> Result<String, Box<dyn std::error::Error>> {
 
 #[cfg(test)]
 pub mod test_utils {
-    use dotenv;
+    use dotenv::dotenv;
     use std::env;
     use crate::auth::credentials::Credentials;
 
     pub fn get_credentials() -> Credentials {
+        dotenv().ok();
+
         let email = env::var("EMAIL").expect("EMAIL environment variable missing");
         let password = env::var("PASSWORD").expect("PASSWORD environment variable missing");
 
