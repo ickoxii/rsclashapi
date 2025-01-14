@@ -27,9 +27,44 @@ pub struct LoginResponse {
     pub auth: Option<Auth>,
     pub developer: Developer,
     #[serde(rename = "temporaryAPIToken")]
-    pub temporary_api_token: String,
+    pub temporary_api_token: TemporaryApiToken,
     #[serde(rename = "swaggerUrl")]
     pub swagger_url: String,
+}
+
+// Logging into your supercell account will return a temporaryAPIToken as
+// a string. The format and body of the token can be found by pasting this
+// token into <https://jwt.io/>
+// Header:
+// {"typ": "JWT","alg": "HS512","kid": "28a318f7-0000-a1eb-7fa1-2c7433c6cca5"}
+// Payload:
+// {"iss": "supercell","aud": "supercell:gameapi","jti": "fdfa9ef0-f9af-1ecf-4554-473b54297655",
+// "iat": 1736552500,"exp": 1736556100,"sub": "developer/431654b0-b27a-eb07-d536-6b58bb47529e",
+// "scopes": ["clash"],"limits": [{"tier": "developer/bronze","type": "throttling"},
+// {"cidrs": ["73.92.85.0/32"],"type": "client"},{"origins": ["developer.clashofclans.com"],
+// "type": "cors"}]}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TemporaryApiToken {
+    pub iss: String,
+    pub aud: String,
+    pub jti: String,
+    pub iat: i64,
+    pub exp: i64,
+    pub sub: String,
+    pub scopes: Vec<Scope>,
+    pub limits: Vec<Limit>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Scope {
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Limit {
+    pub tier: Option<String>,
+    pub cidrs: Option<Vec<String>>,
+    pub origins: Option<Vec<String>>,
+    pub r#type: String,
 }
 
 // This is passed when logging out or revoking a key

@@ -9,6 +9,9 @@ repository = "https://github.com/ickoxii/rsclashapi"
 license = "MIT"
 
 [dependencies]
+# Util
+lazy_static = "~1.5.0"
+
 # Networking
 actix-web = "~4.9.0"
 reqwest = { version = "~0.11.20", features = [
@@ -16,18 +19,22 @@ reqwest = { version = "~0.11.20", features = [
 	  "cookie_store",
 	  "cookies", ] }
 tokio = { version = "~1", features = ["full"] }
+url = "~2.5.4"
 
 # Json serialize/deserialize
 serde = { version = "~1.0.188", features = ["derive"] }
 serde_json = "~1.0.105"
 serde_urlencoded = "~0.7.1"
 serde_repr = "~0.1.16"
+
+# JWT Handling
+jsonwebtoken = "~9"
+
+# Error Handling
 anyhow = "~1.0.95"
 thiserror = "~2.0.10"
-lazy_static = "~1.5.0"
-url = "~2.5.4"
 
 [dev-dependencies]
 dotenv = "~0.15.0"
 dotenv_codegen = "~0.15.0" # For dotenv macro
-wiremock = "~0.6.2"
+wiremock = "~0.6.2" # For simulating API responses
