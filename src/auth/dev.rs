@@ -27,7 +27,8 @@ pub struct LoginResponse {
     pub auth: Option<Auth>,
     pub developer: Developer,
     #[serde(rename = "temporaryAPIToken")]
-    pub temporary_api_token: TemporaryApiToken,
+    // pub temporary_api_token: TemporaryApiToken,
+    pub temporary_api_token: String,
     #[serde(rename = "swaggerUrl")]
     pub swagger_url: String,
 }
@@ -45,18 +46,27 @@ pub struct LoginResponse {
 // "type": "cors"}]}
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TemporaryApiToken {
+    /// Issuer
     pub iss: String,
+    /// Audience
     pub aud: String,
+    /// JWT Id
     pub jti: String,
+    /// Issued at (as UTC timestamp)
     pub iat: i64,
+    /// Expiration (as UTC timestamp)
     pub exp: i64,
+    /// Subject (whom the token refers to
     pub sub: String,
     pub scopes: Vec<Scope>,
     pub limits: Vec<Limit>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Scope {
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub enum Scope {
+    #[serde(rename = "clash")]
+    #[default]
+    Clash,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -91,7 +101,7 @@ pub struct Developer {
     pub game: String,
     pub email: String,
     pub tier: String,
-    pub allowed_scopes: Option<String>,
+    pub allowed_scopes: Option<Scope>,
     pub max_cidrs: Option<String>,
     pub prev_login_ts: Option<String>,
     pub prev_login_ip: Option<String>,
@@ -202,7 +212,7 @@ impl APIAccount {
             "name": key_name,
             "cidrRanges": [ip_address],
             "description": "Key generated via rsclashapi",
-            "scopes": null
+            "scopes": "clash",
         });
 
         // Serialize the body into a string

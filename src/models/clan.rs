@@ -68,7 +68,7 @@ pub struct ClanMemberList(pub Vec<ClanMember>);
 // ----- Clan War Leagues -----
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ClanWarLeagueGroup {
-    pub tag: String,
+    pub tag: Option<String>,
     pub state: WarLeagueState,
     pub season: String,
     pub clans: ClanWarLeagueClanList,

@@ -1,6 +1,5 @@
 // Declare submodules
 pub mod auth;
-pub mod core;
 pub mod models;
 pub mod utils;
 

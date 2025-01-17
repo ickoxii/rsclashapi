@@ -19,7 +19,7 @@ pub enum Role {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "camelCase")]
 pub enum WarLeagueState {
     GroupNotFound,
     NotInWar,
@@ -29,7 +29,7 @@ pub enum WarLeagueState {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "camelCase")]
 pub enum WarState {
     ClanNotFound,
     AccessDenied,
@@ -44,7 +44,7 @@ pub enum WarState {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "camelCase")]
 pub enum WarFrequency {
     Unknown,
     Always,
@@ -56,7 +56,7 @@ pub enum WarFrequency {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "camelCase")]
 pub enum EntryType {
     Open,
     InviteOnly,
@@ -64,14 +64,14 @@ pub enum EntryType {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "camelCase")]
 pub enum BattleModifier {
     None,
     HardMode,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "camelCase")]
 pub enum WarResult {
     Lose,
     Win,
