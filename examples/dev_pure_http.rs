@@ -1,16 +1,35 @@
 // cargo run --example credentials
+use anyhow;
 use dotenv::dotenv;
+use lazy_static::lazy_static;
 use reqwest;
 use serde_json::{from_str, to_string, to_string_pretty, Value};
 use std::env;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::Path;
 use tokio;
-use anyhow;
-use lazy_static::lazy_static;
 
 use rsclashapi::auth::credentials::*;
 use rsclashapi::auth::dev::*;
-use rsclashapi::models::player::Player;
 use rsclashapi::auth::keys::Keys;
+
+/*
+use rsclashapi::models::badge_urls::*;
+use rsclashapi::models::clan::*;
+use rsclashapi::models::clan_capital::*;
+use rsclashapi::models::enums::*;
+use rsclashapi::models::error::*;
+use rsclashapi::models::gold_pass::*;
+use rsclashapi::models::icon_urls::*;
+use rsclashapi::models::labels::*;
+use rsclashapi::models::language::*;
+use rsclashapi::models::league::*;
+use rsclashapi::models::location::*;
+use rsclashapi::models::player::*;
+use rsclashapi::models::ranking::*;
+use rsclashapi::models::status::*;
+*/
 
 fn get_credentials() -> Credentials {
     let email = env::var("EMAIL").expect("EMAIL environment variable missing");
@@ -23,29 +42,123 @@ fn get_credentials() -> Credentials {
     credentials
 }
 
-fn format_tag(tag: &str) -> String {
+#[derive(Debug)]
+pub struct Tags {
+    pub war_tag: String,
+    pub player_tag: String,
+    pub small_player_tag: String,
+    pub lar_tag: String,
+    pub lar_mini_tag: String,
+    pub new_clan_tag: String,
+    pub season_id: String,
+    pub location_id: String,
+    pub league_id: String,
+    pub capital_league_id: String,
+    pub builder_league_id: String,
+    pub war_league_id: String,
+}
+
+fn get_tags() -> Tags {
+    Tags {
+        war_tag: format_tag(env::var("WAR_TAG").unwrap()),
+        player_tag: format_tag(env::var("PT_SOUL").unwrap()),
+        small_player_tag: format_tag(env::var("PT_TH2").unwrap()),
+        lar_tag: format_tag(env::var("CT_LAR").unwrap()),
+        lar_mini_tag: format_tag(env::var("CT_LAR_MINI").unwrap()),
+        new_clan_tag: format_tag(env::var("CT_NEWCLAN").unwrap()),
+        season_id: env::var("SEASON_ID").unwrap(),
+        location_id: env::var("LOCATION_ID").unwrap(),
+        league_id: env::var("LEAGUE_ID").unwrap(),
+        capital_league_id: env::var("CAPITAL_LEAGUE_ID").unwrap(),
+        builder_league_id: env::var("BUILDER_LEAGUE_ID").unwrap(),
+        war_league_id: env::var("WAR_LEAGUE_ID").unwrap(),
+    }
+}
+
+fn format_tag(tag: String) -> String {
     if tag.starts_with('#') {
-        format!("%23{}", &tag[1..])
+        format!("%23{}", &tag[1..])  // Replace "#" with "%23"
+    } else if !tag.starts_with("%23") {
+        format!("%23{}", tag)  // If it doesn't start with "%23", prepend it
     } else {
-        format!("%23{}", tag)
+        tag  // If it's already in "%23" format, leave it
     }
 }
 
 lazy_static! {
-    pub static ref CLIENT: reqwest::Client =
-        reqwest::Client::builder().cookie_store(true).build().unwrap();
+    pub static ref CLIENT: reqwest::Client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+}
+
+async fn fetch_and_save_to_separate_files(
+    api_token: &str,
+    endpoints: &[String],
+) -> Result<(), anyhow::Error> {
+    for endpoint in endpoints {
+        println!("Hitting endpoint: {}", endpoint);
+
+        let response = CLIENT
+            .get(endpoint)
+            .header("Authorization", format!("Bearer {}", api_token))
+            .send()
+            .await?;
+
+        let raw_text = response.text().await?;
+
+        match serde_json::from_str::<Value>(&raw_text) {
+            Ok(json) => {
+                let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+
+                // Generate a file name based on the endpoint
+                let file_name = format_file_name(endpoint);
+
+                let mut file = OpenOptions::new()
+                    .create(true)
+                    .write(true)
+                    .open(file_name)?;
+
+                writeln!(file, "Endpoint: {}\n{}", endpoint, pretty_json)?;
+            }
+            Err(e) => {
+                eprintln!("Failed to parse JSON from {}: {}", endpoint, e);
+                eprintln!("Raw response: {}", raw_text);
+
+                // Save error info in a separate file
+                let file_name = format_file_name(endpoint);
+                let mut file = OpenOptions::new()
+                    .create(true)
+                    .write(true)
+                    .open(file_name)?;
+
+                writeln!(
+                    file,
+                    "Endpoint: {}\nFailed to parse JSON: {}\n",
+                    endpoint, e
+                )?;
+            }
+        }
+    }
+    Ok(())
+}
+
+fn format_file_name(endpoint: &str) -> String {
+    // Replace non-alphanumeric characters with underscores and append ".json"
+    let sanitized = endpoint.replace(|c: char| !c.is_alphanumeric(), "_");
+    format!("raw_responses/{}.json", sanitized)
 }
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     dotenv().ok();
 
-    // Get player tag
-    let soul_tag = format_tag(&env::var("PT_SOUL").expect("PT_SOUL environment variable missing"));
-    // println!("PT_SOUL: {soul_tag}");
-
-    // Grab credentials from dotenv
+    // Grab vars from dotenv
     let credentials = get_credentials();
+    let tags: Tags = get_tags();
+    println!("{:#?}", tags);
+
+    const API_BASE_URL: &'static str = "https://api.clashofclans.com/v1";
 
     // -----Login-----
     // Important -- make sure to build cookie store
@@ -82,19 +195,73 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // println!("\nAPIAccount\n{:#?}", api_account);
 
-    // println!("\nTempToken\n{}", &login_response.temporary_api_token);
+    // Hit API endpoints
+    let api_endpoints = vec![
+        // ----- Clans -----
+        format!(
+            "{}/clans/{}/currentwar/leaguegroup",
+            API_BASE_URL, tags.lar_mini_tag
+        ),
+        format!("{}/clanwarleagues/wars/{}", API_BASE_URL, tags.war_tag),
+        format!("{}/clans/{}/warlog", API_BASE_URL, tags.lar_tag),
+        format!("{}/clans?tag={}", API_BASE_URL, tags.lar_tag),
+        format!("{}/clans/{}/currentwar", API_BASE_URL, tags.lar_tag),
+        format!("{}/clans/{}", API_BASE_URL, tags.lar_tag),
+        format!("{}/clans/{}/members", API_BASE_URL, tags.lar_tag),
+        format!(
+            "{}/clans/{}/capitalraidseasons?limit={}",
+            API_BASE_URL, tags.lar_tag, 5
+        ),
+        // ----- Players -----
+        format!("{}/players/{}", API_BASE_URL, tags.player_tag),
+        // ----- Leagues -----
+        format!("{}/capitalleagues", API_BASE_URL),
+        format!("{}/leagues", API_BASE_URL),
+        format!(
+            "{}/leagues/{}/seasons/{}?limit={}",
+            API_BASE_URL, tags.league_id, tags.season_id, 100
+        ),
+        format!("{}/capitalleagues/{}", API_BASE_URL, tags.capital_league_id),
+        format!(
+            "{}/builderbaseleagues/{}",
+            API_BASE_URL, tags.builder_league_id
+        ),
+        format!("{}/builderbaseleagues", API_BASE_URL),
+        format!("{}/leagues/{}", API_BASE_URL, tags.league_id),
+        format!("{}/leagues/{}/seasons", API_BASE_URL, tags.league_id),
+        format!("{}/warleagues/{}", API_BASE_URL, tags.war_league_id),
+        format!("{}/warleagues", API_BASE_URL),
+        // ----- Locations -----
+        format!(
+            "{}/locations/{}/rankings/clans",
+            API_BASE_URL, tags.location_id
+        ),
+        format!(
+            "{}/locations/{}/rankings/players?limit={}",
+            API_BASE_URL, tags.location_id, 5
+        ),
+        format!(
+            "{}/locations/{}/rankings/players-builder-base?limit={}",
+            API_BASE_URL, tags.location_id, 5
+        ),
+        format!(
+            "{}/locations/{}/rankings/clans-builder-base?limit={}",
+            API_BASE_URL, tags.location_id, 5
+        ),
+        format!("{}/locations", API_BASE_URL),
+        format!(
+            "{}/locations/{}/rankings/capitals?limit={}",
+            API_BASE_URL, tags.location_id, 5
+        ),
+        format!("{}/locations/{}", API_BASE_URL, tags.location_id),
+        // ----- GoldPass -----
+        format!("{}/goldpass/seasons/current", API_BASE_URL),
+        // ----- Labels -----
+        format!("{}/labels/players", API_BASE_URL),
+        format!("{}/labels/clans", API_BASE_URL),
+    ];
 
-    // -----Get Player Info-----
-    let player_response = CLIENT
-        .get(format!("https://api.clashofclans.com/v1/players/{}", soul_tag))
-        .header("Authorization", format!("Bearer {}", &login_response.temporary_api_token))
-        .send()
-        .await?;
-
-    let raw_response = player_response.text().await?;
-
-    let player: Player = serde_json::from_str::<Player>(&raw_response)?;
-    println!("\nPlayer\n{:#?}", player);
+    // fetch_and_save_to_separate_files(&login_response.temporary_api_token, &api_endpoints).await?;
 
     // -----Logout-----
     let res = CLIENT

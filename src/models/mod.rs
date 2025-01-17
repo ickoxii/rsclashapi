@@ -12,5 +12,4 @@ pub mod league;
 pub mod location;
 pub mod player;
 pub mod ranking;
-pub mod role;
 pub mod status;

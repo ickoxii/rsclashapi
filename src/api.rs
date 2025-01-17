@@ -27,7 +27,7 @@ pub mod api {
     }
 
     // Search clans
-    // Parameters:
+    // Parameters: *** At least one filtering parameters must exist ***
     //  name(String > 3 chars): search clans by name. name parameter is
     //      interpreted as a wildcard search,
     //  warFrequency(String): filter by war frequency,
@@ -119,7 +119,7 @@ pub mod api {
     // Parameters:
     //  leagueId(String): identifier of the league,
     //  seasonId(String): identifier of the season,
-    //  limit(integer): limit number of items in response,
+    //  limit(integer): limit number of items in response, must be between 100 and 25_000
     //  after(String): return only items that occur after marker,
     //  before(String): return only items that occur before marker,
     // Return: PlayerRankingList
