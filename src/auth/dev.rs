@@ -7,10 +7,15 @@ use std::sync::Mutex;
 use anyhow;
 
 use super::super::error::APIError;
-use super::super::models::status::Status;
 use super::super::utils::get_ip;
 use super::credentials::Credentials;
-use super::keys::{Key, Keys};
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Status {
+    pub code: i16,
+    pub message: String,
+    pub detail: Option<String>,
+}
 
 #[derive(Debug)]
 pub struct APIAccount {
@@ -106,6 +111,43 @@ pub struct Developer {
     pub prev_login_ts: Option<String>,
     pub prev_login_ip: Option<String>,
     pub prev_login_ua: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct KeyResponse {
+    pub status: Option<Status>,
+    #[serde(rename = "sessionExpiresInSeconds")]
+    pub session_expires_in_seconds: Option<i32>,
+    pub keys: Option<Keys>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Keys {
+    pub keys: Vec<Key>
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Key {
+    pub id: String,
+    #[serde(rename = "developerId")]
+    pub developer_id: String,
+    pub tier: String,
+    pub name: String,
+    pub description: String,
+    pub origins: Option<String>,
+    pub scopes: Vec<String>,
+    #[serde(rename = "cidrRanges")]
+    pub cidr_ranges: Vec<String>,
+    #[serde(rename = "validUntil")]
+    pub valid_until: Option<String>,
+    pub key: String,
+}
+
+impl Keys {
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.keys.len()
+    }
 }
 
 lazy_static! {
