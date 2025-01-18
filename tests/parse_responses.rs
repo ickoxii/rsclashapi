@@ -11,6 +11,9 @@ mod tests {
     use rsclashapi::models::location::*;
     use rsclashapi::models::player::*;
     use rsclashapi::models::ranking::*;
+    use rsclashapi::models::cwl::*;
+    use rsclashapi::models::war::*;
+    use rsclashapi::models::war_log::*;
 
     fn format_file_name(dir_name: &str, endpoint: &str) -> String {
         // Extract the endpoint from the URL (remove the base URL)
