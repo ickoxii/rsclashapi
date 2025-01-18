@@ -6,10 +6,10 @@ use crate::models::badge_urls::BadgeUrls;
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ClanWarLeagueGroup {
     pub tag: Option<String>,
-    pub state: WarLeagueState,
-    pub season: String,
-    pub clans: ClanWarLeagueClanList,
-    pub rounds: ClanWarLeagueRoundList,
+    pub state: Option<WarLeagueState>,
+    pub season: Option<String>,
+    pub clans: Option<ClanWarLeagueClanList>,
+    pub rounds: Option<ClanWarLeagueRoundList>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

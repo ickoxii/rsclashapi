@@ -1,6 +1,5 @@
 // cargo run --example dotenv
 use dotenv::dotenv;
-use std::env;
 
 #[macro_use]
 extern crate dotenv_codegen;

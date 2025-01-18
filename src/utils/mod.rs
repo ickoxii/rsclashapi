@@ -1,10 +1,12 @@
 /// Formats a player or clan tag to begin with the url encoding for a hashtag
 /// i.e. '#' -> '%23'
 pub fn format_tag(tag: &str) -> String {
-    if tag.starts_with('#') {
-        format!("%23{}", &tag[1..])
+    if tag.starts_with("%23") {
+        tag.to_string() // If it already starts with "%23", return it as is
+    } else if tag.starts_with('#') {
+        format!("%23{}", &tag[1..]) // Replace '#' with "%23"
     } else {
-        format!("%23{}", tag)
+        format!("%23{}", tag) // Add "%23" to the tag if it doesn't start with '#' or "%23"
     }
 }
 

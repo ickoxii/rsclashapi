@@ -7,7 +7,7 @@ use crate::models::paging::Paging;
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClanCapital {
-    pub capital_hall_level: u8,
+    pub capital_hall_level: Option<u8>,
     pub districts: Option<Vec<ClanDistrictData>>,
 }
 

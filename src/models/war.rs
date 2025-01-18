@@ -8,7 +8,7 @@ use crate::models::badge_urls::BadgeUrls;
 #[serde(rename_all = "camelCase")]
 pub struct ClanWar {
     pub state: WarState,
-    pub team_size: u8,
+    pub team_size: Option<u8>,
     pub attacks_per_member: Option<u8>,
     pub preparation_start_time: String,
     pub start_time: String,
@@ -21,8 +21,8 @@ pub struct ClanWar {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClanWarMember {
-    pub tag: String,
-    pub name: String,
+    pub tag: Option<String>, // Or is it this tag? (or both)
+    pub name: Option<String>,
     pub map_position: u8,
     pub townhall_level: u8,
     pub opponent_attacks: u8,
@@ -47,12 +47,12 @@ pub struct ClanWarAttack {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WarClan {
-    pub tag: String,
-    pub name: String,
+    pub tag: Option<String>, // is it this tag missing?
+    pub name: Option<String>,
     pub badge_urls: Option<BadgeUrls>,
     pub clan_level: u8,
     pub attacks: Option<u8>,
     pub stars: u16,
     pub destruction_percentage: f32,
-    pub members: Vec<ClanWarMember>,
+    pub members: Option<Vec<ClanWarMember>>,
 }
