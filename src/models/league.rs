@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::icon_urls::LeagueIconUrls;
+use super::paging::Paging;
 
 #[derive(Debug, Clone, Deserialize_repr, Serialize_repr, Copy)]
 #[repr(u32)]
@@ -131,10 +132,17 @@ pub enum BuilderLeagueId {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct League {
     pub name: String, // JsonLocalizedName
     pub id: LeagueId, // might have to change to u32
     pub icon_urls: Option<LeagueIconUrls>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct LeagueList {
+    pub items: Vec<League>,
+    pub paging: Paging,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -144,21 +152,42 @@ pub struct CapitalLeague {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CapitalLeagueList {
+    pub items: Vec<CapitalLeague>,
+    pub paging: Paging
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct WarLeague {
     pub name: String,
     pub id: WarLeagueId,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct BuilderBaseLeague {
+pub struct WarLeagueList {
+    pub items: Vec<WarLeague>,
+    pub paging: Paging,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct BuilderLeague {
     pub name: String,
     pub id: BuilderLeagueId,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct LeagueSeason {
-    id: u32,
+pub struct BuilderLeagueList {
+    pub items: Vec<BuilderLeague>,
+    pub paging: Paging,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct LeagueSeasonList(pub Vec<LeagueSeason>);
+pub struct LeagueSeason {
+    pub id: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct LeagueSeasonList {
+    pub items: Vec<LeagueSeason>,
+    pub paging: Paging,
+}

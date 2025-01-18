@@ -41,6 +41,7 @@ pub enum WarState {
     War,
     InWar,
     Ended,
+    WarEnded, // When getting a clan war league war??
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

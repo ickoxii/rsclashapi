@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::{badge_urls, icon_urls, labels};
 use crate::models::enums::player::*;
 use crate::models::enums::clan::Role;
+use crate::models::league::*;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -26,12 +27,12 @@ pub struct Player {
     pub donations_received: u32,
     pub clan_capital_contributions: u32,
     pub clan: Option<PlayerClan>,
-    pub league: Option<PlayerLeague>,
-    pub builder_base_league: Option<BuilderBaseLeague>,
+    pub league: Option<League>,
+    pub builder_base_league: Option<BuilderLeague>,
     pub legend_statistics: Option<PlayerLegendStatistics>,
     pub achievements: Vec<Achievement>,
     pub player_house: Option<PlayerHouse>,
-    pub labels: Option<Vec<labels::PlayerLabels>>,
+    pub labels: Option<Vec<labels::PlayerLabel>>,
     pub troops: Vec<Troop>,
     pub heroes: Option<Vec<Hero>>,
     pub hero_equipment: Option<Vec<HeroEquipment>>,
@@ -45,20 +46,6 @@ pub struct PlayerClan {
     pub name: String,
     pub clan_level: u8,
     pub badge_urls: badge_urls::BadgeUrls,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PlayerLeague {
-    pub id: u32,
-    pub name: String,
-    pub icon_urls: icon_urls::LeagueIconUrls,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct BuilderBaseLeague {
-    pub id: u32,
-    pub name: String,
 }
 
 impl WarPreference {

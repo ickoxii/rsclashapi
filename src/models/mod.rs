@@ -10,6 +10,6 @@ pub mod labels;
 pub mod language;
 pub mod league;
 pub mod location;
+pub mod paging;
 pub mod player;
 pub mod ranking;
-pub mod status;

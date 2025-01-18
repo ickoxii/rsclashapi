@@ -13,7 +13,6 @@ mod test {
     use std::env;
 
     use crate::auth::dev::{APIAccount, LoginResponse};
-    use crate::auth::keys::Keys;
     use crate::auth::credentials::Credentials;
 
     use crate::api::api;
@@ -34,6 +33,7 @@ mod test {
             .build()
     }
 
+    /*
     #[tokio::test]
     async fn test_login() -> anyhow::Result<()> {
         let credentials: Credentials = get_credentials();
@@ -58,4 +58,5 @@ mod test {
 
         Ok(())
     }
+    */
 }

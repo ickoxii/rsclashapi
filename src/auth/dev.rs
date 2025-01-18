@@ -1,10 +1,9 @@
+use anyhow;
 use lazy_static::lazy_static;
-/// This file contains functionality regarding login/out
 use reqwest;
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 use std::sync::Mutex;
-use anyhow;
 
 use super::super::error::APIError;
 use super::super::utils::get_ip;
@@ -32,7 +31,6 @@ pub struct LoginResponse {
     pub auth: Option<Auth>,
     pub developer: Developer,
     #[serde(rename = "temporaryAPIToken")]
-    // pub temporary_api_token: TemporaryApiToken,
     pub temporary_api_token: String,
     #[serde(rename = "swaggerUrl")]
     pub swagger_url: String,
@@ -49,6 +47,10 @@ pub struct LoginResponse {
 // "scopes": ["clash"],"limits": [{"tier": "developer/bronze","type": "throttling"},
 // {"cidrs": ["73.92.85.0/32"],"type": "client"},{"origins": ["developer.clashofclans.com"],
 // "type": "cors"}]}
+//
+// JWT Tokens issued by supercell are used for server-to-server communication.
+// As such, we do not need to focus on decoding them, we can just pass it to
+// the endpoint we are communicating with as a Authorization: Bearer {} header.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TemporaryApiToken {
     /// Issuer
@@ -123,7 +125,7 @@ pub struct KeyResponse {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Keys {
-    pub keys: Vec<Key>
+    pub keys: Vec<Key>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -151,8 +153,6 @@ impl Keys {
 }
 
 lazy_static! {
-    pub static ref DEV_API_URL: Mutex<String> =
-        Mutex::new(String::from("https://developer.clashofclans.com/api"));
     pub static ref CLIENT: reqwest::Client = reqwest::Client::builder()
         .cookie_store(true)
         .build()
@@ -160,6 +160,7 @@ lazy_static! {
 }
 
 impl APIAccount {
+    pub const DEV_BASE_URL: &'static str = "https://developer.clashofclans.com/api";
     pub const LOGIN_ENDPOINT: &'static str = "/login";
     pub const LOGOUT_ENDPOINT: &'static str = "/logout";
     pub const KEY_CREATE_ENDPOINT: &'static str = "/apikey/create";
@@ -174,7 +175,10 @@ impl APIAccount {
     /// Login to the supercell api using an email and password
     pub async fn login(email: &str, password: &str) -> anyhow::Result<Self, APIError> {
         // Init here because i have no idea what the fuck im doing
-        let client = reqwest::Client::builder().cookie_store(true).build().unwrap();
+        let client = reqwest::Client::builder()
+            .cookie_store(true)
+            .build()
+            .unwrap();
 
         // Create credentials
         let credentials = Credentials::builder()
@@ -190,11 +194,9 @@ impl APIAccount {
         )
         .map_err(|e| APIError::SerializationFailed(e.to_string()))?; // Ensure error is converted to APIError
 
-        let base_url = DEV_API_URL.lock().unwrap();
-
         // Send login request
         let res = client
-            .post(format!("{}{}", base_url, Self::LOGIN_ENDPOINT))
+            .post(format!("{}{}", Self::DEV_BASE_URL, Self::LOGIN_ENDPOINT))
             .body(credential_body)
             .header("Content-Type", "application/json")
             .send()
@@ -219,12 +221,13 @@ impl APIAccount {
 
     /// Lists all keys tied to a supercell API account
     pub async fn list_keys() -> anyhow::Result<Keys, APIError> {
-        let base_url = DEV_API_URL.lock().unwrap();
-
-        let client = reqwest::Client::builder().cookie_store(true).build().unwrap();
+        let client = reqwest::Client::builder()
+            .cookie_store(true)
+            .build()
+            .unwrap();
 
         let key_list_res = client
-            .post(format!("{}{}", base_url, Self::KEY_LIST_ENDPOINT))
+            .post(format!("{}{}", Self::DEV_BASE_URL, Self::KEY_LIST_ENDPOINT))
             .send()
             .await
             .map_err(APIError::RequestFailed)?;
@@ -242,7 +245,7 @@ impl APIAccount {
 
     pub async fn create_key(
         key_name: &str,
-        account: &mut APIAccount
+        account: &mut APIAccount,
     ) -> anyhow::Result<Key, APIError> {
         // Retrieve the public IP address
         let ip_address = get_ip()
@@ -261,11 +264,9 @@ impl APIAccount {
         let body = serde_json::to_string(&key_body)
             .map_err(|e| APIError::SerializationFailed(e.to_string()))?;
 
-        let base_url = DEV_API_URL.lock().unwrap();
-
         // Send the request to create the key
         let res = CLIENT
-            .post(format!("{}{}", base_url, Self::KEY_CREATE_ENDPOINT))
+            .post(format!("{}{}", Self::DEV_BASE_URL, Self::KEY_CREATE_ENDPOINT))
             .body(body)
             .header("Content-Type", "application/json")
             .send()
@@ -294,10 +295,8 @@ impl APIAccount {
         key_id: &str,
         account: &mut APIAccount,
     ) -> anyhow::Result<LogoutResponse, APIError> {
-        let base_url = DEV_API_URL.lock().unwrap();
-
         // Build the URL for the revocation request
-        let url = format!("{}{}", base_url, Self::KEY_REVOKE_ENDPOINT);
+        let url = format!("{}{}", Self::DEV_BASE_URL, Self::KEY_REVOKE_ENDPOINT);
 
         // Create the request body with the key ID
         let request_body = serde_json::json!({

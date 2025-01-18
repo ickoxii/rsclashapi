@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::models::badge_urls::BadgeUrls;
+use crate::models::paging::Paging;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,16 +15,28 @@ pub struct ClanCapital {
 #[serde(rename_all = "camelCase")]
 pub struct ClanDistrictData {
     pub name: String, // JsonLocalizedName
-    pub id: u8, // Unsure
+    pub id: CapitalDistrictId,
     pub district_hall_level: u8,
+}
+
+#[derive(Debug, Clone, Deserialize_repr, Serialize_repr)]
+#[repr(i32)]
+pub enum CapitalDistrictId {
+    CapitalPeak = 70_000_000,
+    BarbarianCamp = 70_000_001,
+    WizardValley = 70_000_002,
+    BalloonLagoon = 70_000_003,
+    BuildersWorkshop = 70_000_004,
+    DragonCliffs = 70_000_005,
+    GolemQuarry = 70_000_006,
+    SkeletonPark = 70_000_007,
+    GoblinMines = 70_000_008,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClanCapitalRaidSeason {
-    pub attack_log: ClanCapitalRaidSeasonAttackLog,
-    pub defense_log: ClanCapitalRaidSeasonDefenseLog,
-    pub state: String,
+    pub state: String, // Get actual state enums
     pub start_time: String,
     pub end_time: String,
     pub capital_total_loot: u32,
@@ -31,11 +45,16 @@ pub struct ClanCapitalRaidSeason {
     pub enemy_districts_destroyed: u16,
     pub offensive_reward: u16,
     pub defensive_reward: u16,
-    pub members: ClanCapitalRaidSeasonMemberList,
+    pub members: Option<ClanCapitalRaidSeasonMemberList>,
+    pub attack_log: ClanCapitalRaidSeasonAttackLog,
+    pub defense_log: ClanCapitalRaidSeasonDefenseLog,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct ClanCapitalRaidSeasons(pub Vec<ClanCapitalRaidSeason>);
+pub struct ClanCapitalRaidSeasons {
+    pub items: Vec<ClanCapitalRaidSeason>,
+    pub paging: Paging,
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -89,14 +108,14 @@ pub struct ClanCapitalRaidSeasonClanInfo {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClanCapitalRaidSeasonDistrict {
-    pub stars: u8,
+    pub id: CapitalDistrictId,
     pub name: String, // JsonLocalizedName
-    pub id: u16,
+    pub district_hall_level: u8,
     pub destruction_percent: u8,
+    pub stars: u8,
     pub attack_count: u8,
     pub total_looted: u16,
-    pub attacks: ClanCapitalRaidSeasonAttackList,
-    pub district_hall_level: u8,
+    pub attacks: Option<Vec<ClanCapitalRaidSeasonAttack>>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

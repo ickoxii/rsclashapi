@@ -2,6 +2,7 @@ use serde::{Serialize, Deserialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use super::icon_urls;
+use super::paging::Paging;
 
 #[derive(Debug, Serialize_repr, Deserialize_repr, Clone, Copy)]
 #[repr(u32)]
@@ -51,16 +52,28 @@ pub enum ClanLabelId {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PlayerLabels {
+pub struct PlayerLabel {
     pub id: PlayerLabelId,
     pub name: String,
     pub icon_urls: icon_urls::LabelIconUrls,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PlayerLabelResponse {
+    pub items: Vec<PlayerLabel>,
+    pub paging: Paging,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct ClanLabels {
+pub struct ClanLabel {
     pub id: ClanLabelId,
     pub name: String,
     pub icon_urls: icon_urls::LabelIconUrls,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ClanLabelResponse {
+    pub items: Vec<ClanLabel>,
+    pub paging: Paging,
 }

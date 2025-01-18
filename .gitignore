@@ -5,4 +5,5 @@ todo.md
 Cargo.lock
 
 https/
-raw_responses
+raw_responses/
+error_responses/
