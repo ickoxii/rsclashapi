@@ -2,6 +2,20 @@
 use reqwest::header::InvalidHeaderValue;
 use thiserror::Error;
 
+#[derive(Debug)]
+pub enum ErrorKind {
+    /// HTTP-related errors (e.g., 400, 404, 403)
+    HttpError,
+    /// Serialization or deserialization errors
+    SerializationError,
+    /// Generic client-side errors (e.g., invalid credentials, bad URL)
+    ClientError,
+    /// Unknown or unclassified errors
+    UnknownError,
+    /// Server-related errors (e.g., maintenance, unknown server issues)
+    ServerError,
+}
+
 #[derive(Error, Debug)]
 pub enum APIError {
     /// Client is not set up
@@ -67,6 +81,28 @@ impl APIError {
             reqwest::StatusCode::TOO_MANY_REQUESTS => APIError::Throttle,
             reqwest::StatusCode::SERVICE_UNAVAILABLE => APIError::Maintenance,
             _ => APIError::BadResponse(body, status),
+        }
+    }
+
+    /// Returns an `ErrorKind` classification based on the specific error
+    pub fn kind(&self) -> ErrorKind {
+        match self {
+            APIError::NotReady => ErrorKind::ClientError,
+            APIError::InvalidCredentials => ErrorKind::ClientError,
+            APIError::BadUrl(_) => ErrorKind::ClientError,
+            APIError::RequestFailed(_) => ErrorKind::HttpError,
+            APIError::InvalidHeader(_) => ErrorKind::ClientError,
+            APIError::FailedGetIp(_) => ErrorKind::ClientError,
+            APIError::BadParameters => ErrorKind::HttpError,
+            APIError::AccessDenied => ErrorKind::HttpError,
+            APIError::NotFound => ErrorKind::HttpError,
+            APIError::Throttle => ErrorKind::HttpError,
+            APIError::Unknown(_) => ErrorKind::UnknownError,
+            APIError::Maintenance => ErrorKind::ServerError,
+            APIError::InvalidParameters(_) => ErrorKind::ClientError,
+            APIError::BadResponse(_, _) => ErrorKind::HttpError,
+            APIError::InvalidTag(_) => ErrorKind::ClientError,
+            APIError::SerializationFailed(_) => ErrorKind::SerializationError,
         }
     }
 }
