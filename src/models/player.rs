@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{badge_urls, icon_urls, labels};
+use super::{badge_urls, labels};
 use crate::models::enums::player::*;
 use crate::models::enums::clan::Role;
 use crate::models::league::*;
