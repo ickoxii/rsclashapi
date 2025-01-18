@@ -49,7 +49,8 @@ mod tests {
     fn parse_clanwarleagues_wars() {
         const FILE: &'static str = "_clanwarleagues_wars__238YGPV2L2J.json";
         let path = format!("{}/{}", BASE_DIR, FILE);
-        // TODO: I think this returns a clan war object instead of a ClanWarLeagueGroup
+        // TODO: I think this returns a clan war object instead of a ClanWarLeagueGroup.
+        // Does this change during cwl?
         let league_group: ClanWar = read_and_parse_json(&path).expect("Failed to parse json");
         println!("{:#?}", league_group);
     }
@@ -66,7 +67,6 @@ mod tests {
     fn parse_clan_search() {
         const FILE: &'static str = "_clans_name_loot_20_26_20run_limit_5.json";
         let path = format!("{}/{}", BASE_DIR, FILE);
-        // TODO: Change to Vec<Clan>?
         let clan_list: ClanList = read_and_parse_json(&path).expect("Failed to parse json");
         println!("{:#?}", clan_list);
     }
